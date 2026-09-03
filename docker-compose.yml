@@ -1,0 +1,40 @@
+# Hermes Agent #2 (ikinci kullanıcı) — Coolify deploy. OpenRouter tabanlı, izole.
+services:
+  agent2:
+    image: nousresearch/hermes-agent:latest
+    command: ["gateway", "run"]
+    restart: unless-stopped
+    volumes:
+      - hermes_data2:/opt/data
+    environment:
+      HERMES_MODEL: ${HERMES_MODEL:-openai/gpt-4o-mini}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS}
+      HERMES_DASHBOARD: "1"
+      HERMES_DASHBOARD_HOST: "0.0.0.0"
+      HERMES_DASHBOARD_PORT: "9119"
+      HERMES_DASHBOARD_BASIC_AUTH_USERNAME: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+      HERMES_DASHBOARD_BASIC_AUTH_SECRET: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
+    networks:
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - "traefik.http.routers.agent2.rule=Host(`agent.arcai.work`)"
+      - traefik.http.routers.agent2.entrypoints=https
+      - traefik.http.routers.agent2.tls=true
+      - traefik.http.routers.agent2.tls.certresolver=letsencrypt
+      - traefik.http.services.agent2.loadbalancer.server.port=9119
+      - "traefik.http.routers.agent2-http.rule=Host(`agent.arcai.work`)"
+      - traefik.http.routers.agent2-http.entrypoints=http
+      - traefik.http.routers.agent2-http.middlewares=agent2-redirect
+      - traefik.http.middlewares.agent2-redirect.redirectscheme.scheme=https
+
+volumes:
+  hermes_data2:
+
+networks:
+  coolify:
+    external: true
