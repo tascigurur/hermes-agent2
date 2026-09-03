@@ -1,4 +1,4 @@
-# Hermes Agent #2 (ikinci kullanıcı) — Coolify deploy. OpenRouter tabanlı, izole.
+# Hermes Agent #2 (derin araştırma, OpenRouter) + Open WebUI (kullanıcı dostu web chat)
 services:
   agent2:
     image: nousresearch/hermes-agent:latest
@@ -11,6 +11,7 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS}
+      API_SERVER_KEY: ${API_SERVER_KEY}
       HERMES_DASHBOARD: "1"
       HERMES_DASHBOARD_HOST: "0.0.0.0"
       HERMES_DASHBOARD_PORT: "9119"
@@ -32,8 +33,39 @@ services:
       - traefik.http.routers.agent2-http.middlewares=agent2-redirect
       - traefik.http.middlewares.agent2-redirect.redirectscheme.scheme=https
 
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    depends_on:
+      - agent2
+    volumes:
+      - openwebui_data:/app/backend/data
+    environment:
+      OPENAI_API_BASE_URL: "http://agent2:8642/v1"
+      OPENAI_API_KEY: ${API_SERVER_KEY}
+      WEBUI_AUTH: "true"
+      WEBUI_NAME: "Araştırma Asistanı"
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY}
+      ENABLE_OLLAMA_API: "false"
+      RAG_EMBEDDING_ENGINE: "openai"
+    networks:
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - "traefik.http.routers.owui2.rule=Host(`chat.agent.arcai.work`)"
+      - traefik.http.routers.owui2.entrypoints=https
+      - traefik.http.routers.owui2.tls=true
+      - traefik.http.routers.owui2.tls.certresolver=letsencrypt
+      - traefik.http.services.owui2.loadbalancer.server.port=8080
+      - "traefik.http.routers.owui2-http.rule=Host(`chat.agent.arcai.work`)"
+      - traefik.http.routers.owui2-http.entrypoints=http
+      - traefik.http.routers.owui2-http.middlewares=owui2-redirect
+      - traefik.http.middlewares.owui2-redirect.redirectscheme.scheme=https
+
 volumes:
   hermes_data2:
+  openwebui_data:
 
 networks:
   coolify:
