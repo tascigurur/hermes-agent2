@@ -1,4 +1,6 @@
-# Hermes Agent #2 (derin araştırma, OpenRouter) + Open WebUI (kullanıcı dostu web chat)
+# Hermes Agent #2 (derin araştırma, OpenRouter) + Open WebUI
+# agent.arcai.work        -> Open WebUI (kullanıcı dostu chat)
+# admin.agent.arcai.work  -> Hermes yönetim paneli
 services:
   agent2:
     image: nousresearch/hermes-agent:latest
@@ -23,12 +25,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      - "traefik.http.routers.agent2.rule=Host(`agent.arcai.work`)"
+      - "traefik.http.routers.agent2.rule=Host(`admin.agent.arcai.work`)"
       - traefik.http.routers.agent2.entrypoints=https
       - traefik.http.routers.agent2.tls=true
       - traefik.http.routers.agent2.tls.certresolver=letsencrypt
       - traefik.http.services.agent2.loadbalancer.server.port=9119
-      - "traefik.http.routers.agent2-http.rule=Host(`agent.arcai.work`)"
+      - "traefik.http.routers.agent2-http.rule=Host(`admin.agent.arcai.work`)"
       - traefik.http.routers.agent2-http.entrypoints=http
       - traefik.http.routers.agent2-http.middlewares=agent2-redirect
       - traefik.http.middlewares.agent2-redirect.redirectscheme.scheme=https
@@ -53,12 +55,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      - "traefik.http.routers.owui2.rule=Host(`chat.agent.arcai.work`)"
+      - "traefik.http.routers.owui2.rule=Host(`agent.arcai.work`)"
       - traefik.http.routers.owui2.entrypoints=https
       - traefik.http.routers.owui2.tls=true
       - traefik.http.routers.owui2.tls.certresolver=letsencrypt
       - traefik.http.services.owui2.loadbalancer.server.port=8080
-      - "traefik.http.routers.owui2-http.rule=Host(`chat.agent.arcai.work`)"
+      - "traefik.http.routers.owui2-http.rule=Host(`agent.arcai.work`)"
       - traefik.http.routers.owui2-http.entrypoints=http
       - traefik.http.routers.owui2-http.middlewares=owui2-redirect
       - traefik.http.middlewares.owui2-redirect.redirectscheme.scheme=https
